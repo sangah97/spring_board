@@ -1,6 +1,6 @@
 # spring_board
 
-<img width="100% src="https://github.com/sangah97/spring_board/blob/7d4da629d78abdc0e9a0f9a4e0e522565b1e595d/spring_board.png">
+<img width="100%" src="https://github.com/sangah97/spring_board/blob/7d4da629d78abdc0e9a0f9a4e0e522565b1e595d/spring_board.png">
 
 <p>
   『스프링 게시판』은 Spring 프레임워크를 활용하여 개발된 『게시판 CRUD 』기능을 구현한 프로젝트입니다.<br>
