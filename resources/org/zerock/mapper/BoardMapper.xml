@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.zerock.mapper.BoardMapper">
+	<select id="getList" resultType="org.zerock.domain.BoardVO">
+	<![CDATA[
+		select * from tbl_board where bno > 0 order by bno desc
+	]]>
+	</select>
+	<insert id="insert">
+		insert into tbl_board (bno, title, content, writer)
+		values (SEQ_BOARD.nextval, #{title}, #{content}, #{writer})	
+	</insert>
+	
+	<insert id="insertSelectKey">
+		<selectKey keyProperty="bno" order="BEFORE" resultType="Long">
+			select seq_board.nextval from dual
+		</selectKey>
+		insert into tbl_board (bno, title, content, writer)
+		values (#{bno}, #{title}, #{content}, #{writer})
+	</insert>
+
+	<select id="read" resultType="org.zerock.domain.BoardVO">
+		select * from tbl_board where bno = #{bno}
+	</select>
+
+	<delete id="delete">
+		delete from tbl_board where bno = #{bno}
+	</delete>
+
+	<update id="update">
+		update tbl_board 
+		set title = #{title},
+		content = #{content},
+		writer = #{writer},
+		updatedate = sysdate
+		where
+		bno = #{bno}
+	</update>
+	
+<!--  
+	# 인라인뷰 = BoardVO를 구성하는데 필요한 모든 컬럼과 ROWNUM을 RN이라는 별칭을 이용해 만들어줌 (예)20
+	# 바깥쪽 SQL = RN컬럼을 조건으로 처리 (예)10
+	# 오라클 힌트
+	 = select문에 부가적인 조건을 전달할때 '힌트' 사용
+	 = DB에 내가 작성한 select문을 '이렇게 실행해 주세요~~'하는것임 -> 힌트구문은 에러발생시 SQL구문에 영향을 미치지 않음
+	 = (형식) /*+힌트이름*/
+	# ROWNUM
+	 = 오라클에서 페이징 처리를 위해 ROWNUM이라는 특별한 키워드를 사용해서 데이터 순번을 붙여 사용
+	 = 데이터를 가져올때 적용되는 것.
+	 = INDEX DESC을 사용하면 -> pk와 정렬된 데이터를 오름차순순으로 쓰기떄문에 -> 최근 글번호를 맨위로 일정하게 오도록 할수 있음
+	# 인라인뷰
+	 = select문 안쪽 from절에 다시 오는 select문이라고 할수 있음
+	 = 어떤 결과를 구하는 select문이 있고 -> 그 결과를 다시 대상으로 삼아서 select를 하는 것임
+	 = FROM구문 안에 바로 작성하는 개념
+-->
+
+
+	<!-- Paging -->
+	<select id="getListWithPaging" resultType="org.zerock.domain.BoardVO">
+		<![CDATA[
+	  	select 
+	    bno, title, content, writer, regdate, updatedate
+	  	from
+	      (
+	      select /*+INDEX_DESC(tbl_board pk_board) */
+	        rownum rn, bno, title, content, writer, regdate, updatedate 
+	      from 
+	        tbl_board
+	      where rownum <= #{pageNum} * #{amount}
+	      )
+	      where rn > (#{pageNum} -1) * #{amount}
+	  	]]>
+	</select>
+
+<!-- 전체 데이터 갯수 처리 = 소스캡쳐 넘버링 -->
+	<select id="getTotalCount" resultType="int">
+		select count(*) from tbl_board where bno > 0
+	</select>
+	
+	
+</mapper>
